@@ -31,7 +31,18 @@ RESULTS=$(
      -G -d "$filter"
 )
 
-echo $RESULTS
+
+echo "name,from,to,$(echo $RESULTS | jq -r '.metric_data.metrics[0].timeslices[0].values| keys | join(",")')"
+while read endpoint; do
+	name=$(echo $endpoint | jq -r '.name')
+	while read timeslice; do
+		#echo "$name,$(echo $timeslice | jq -r '[.from, .to] + .values[] | join(",")')"
+		echo "$name,$(echo $timeslice | jq -r '[.from, .to, .values[]] | map(tostring) | join(",") ')"
+		#echo "$name,$(echo $timeslice | jq -r '.values | select()')"
+	done < <(echo $endpoint | jq -c '.timeslices[]')
+done < <(echo $RESULTS | jq -c '.metric_data.metrics[]')
+
+
 
 
 #mapfile -t metrics < <(
