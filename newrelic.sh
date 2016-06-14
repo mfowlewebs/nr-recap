@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
 set -e
+
 [ -z "$NEW_RELIC_API_KEY" ] && echo "Need NEW_RELIC_API_KEY" >2 && exit 1
 [ -n "$1" ] && APP="$1" || APP=16882879
 [ -z "$FILTER" ] && FILTER="name=WebTransactionTotalTime/"
-[ -z "$FROM" ] && FROM=$(date --iso-8601=minutes -d "$(date +%Y/%m/)$(($(date +%-d) - 1))")
-[ -z "$TO" ] && TO=$(date --iso-8601=minutes -d $(date +%D))
+[ -z "$DAYS_AGO" ] && DAYS_AGO=1
+[ -z "$FROM" ] && FROM=$(date --iso-8601=minutes -d $(date +%D)" - $(($DAYS_AGO * 24)) hours")
+[ -z "$TO" ] && TO=$(date --iso-8601=minutes -d $(date --iso-8601=minutes -d $FROM)" + 24 hours")
 [ -z "$PERIOD" ] && PERIOD=$((60 * 60 * 24))
 
 METRICS=$(\
